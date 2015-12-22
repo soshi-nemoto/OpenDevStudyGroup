@@ -1,0 +1,54 @@
+- hosts: httpd-server
+  vars:
+    src_url: 'http://sg2.php.net/distributions/php-5.4.44.tar.gz'
+    src_file: 'php-5.4.44.tar.gz'
+    src_dir: '/home/vagrant/src'
+    build_dir: '/home/vagrant/src/php-5.4.44'
+    php_dso_file: '/usr/lib64/httpd/modules/libphp5.so'
+    configure_opt: '--with-apxs2 --with-mysql --enable-intl --enable-mbstring --enable-mbregex'
+
+  tasks:
+    - name: "PHP:install related packages"
+      become: yes
+      yum: name=wget state=latest
+      yum: name={{ item }} state=latest
+      with_items:
+        - wget
+        - libxml2
+        - libxml2-devel
+        - icu
+        - libicu-devel
+
+    - name: "PHP:make build dir"
+      file: dest={{src_dir}} state=directory
+
+    - name: "PHP:check local source"
+      command: ls -l {{src_dir}}/{{src_file}}
+      register: src_exist
+      ignore_errors: True
+      
+    - name: "PHP:wget the php source"
+      get_url: url={{src_url}} dest={{src_dir}}
+      when: src_exist|failed
+     
+    - name: "PHP:check DSO"
+      command: ls -l {{php_dso_file}}
+      register: dso_exist
+      ignore_errors: True
+
+    - name: "PHP:unarchive source"
+      command: chdir={{src_dir}} tar zxvf {{src_file}}
+      when: dso_exist|failed
+        
+    - name: "PHP:configure"
+      command: chdir={{build_dir}} ./configure {{configure_opt}}
+      when: dso_exist|failed
+
+    - name: "PHP:make"
+      command: chdir={{build_dir}} make
+      when: dso_exist|failed
+
+    - name: "PHP:make install"
+      become: yes
+      command: chdir={{build_dir}} make install
+      when: dso_exist|failed

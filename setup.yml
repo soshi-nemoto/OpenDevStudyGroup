@@ -1,0 +1,6 @@
+# setup httpd
+- include: playbooks/httpd.yml
+# setup mysqld
+- include: playbooks/mysqld.yml
+# setup php
+- include: playbooks/php.yml
