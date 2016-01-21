@@ -6,45 +6,18 @@
       * $ fab -R {ROLE} [deploy|tags|change|remove}
 * How to use.
 
-    * Preparation (setup files)
+    * Preparation (see. Preparation_for_Fabric2.pdf)
         1. edit "Vagrantfile" and fix IP address of your vagrant machine.
-            * {IP_ADDRESS_OF_YOUR_VAGRANT_MACHINE}
         1. edit "hosts" file to set IP address of the vagrant machine.
-            * {IP_ADDRESS_OF_YOUR_VAGRANT_MACHINE}
-        1. put ssh private key for github access to "fabric_files/resources/".
-            * {IP_ADDRESS_OF_YOUR_VAGRANT_MACHINE}
-            * {PRIVATE_KEY_FILE_FOR_GITHUB}
-            * {PRIVATE_KEY_FILE_FOR_VAGRANT_MACHINE}
-                * If you cannot find vagrant's key, please use 'vagrant ssh-config' after creating vagrant machine.
+put ssh private key for github access to "fabric_files/resources/".
+        1. — create Vagrant machine —
         1. edit "fabric_files/resources/ssh_config".
-            * {PRIVATE_KEY_FILE_FOR_GITHUB}
         1. edit "fabric_files/resource.py".
-            * {PRIVATE_KEY_FILE_FOR_GITHUB}
-            * If you want to deploy your own source on github, please fix the value of "env.git['repository']"
-        1. edit your ssh condig file (~/.ssh/config)
-            * {IP_ADDRESS_OF_YOUR_VAGRANT_MACHINE}
-            * {PRIVATE_KEY_FILE_FOR_VAGRANT_MACHINE}
-
-```config:~/.ssh/config
-Host *
-    StrictHostKeyChecking no
-
-Host {IP_ADDRESS_OF_YOUR_VAGRANT_MACHINE}
-  User vagrant
-  TCPKeepAlive yes
-  IdentityFile {PRIVATE_KEY_FILE_FOR_VAGRANT_MACHINE}
-  IdentitiesOnly yes
-  ControlPersist 2h
-```
-
-    * Preparation (create vagrant machine)
-        1. create vagrant machine
-            * $ vagrant up
-        1. do all provisions.(Ansible)
-            * $ vagrant provision
-                * If errors appear, repeat this step after fixing vagrat/ansible files.
+        1. edit your ssh condig file (~/.ssh/config : on local)
                 
     * Deploy
+        1. test this deploy tool
+            * $ fab help
         1. deploy code to the machine from github.
             * $ fab -R {ROLE} deploy
                 * Default ROLE name of this script is 'httpd-server' defined in 'hosts'.
