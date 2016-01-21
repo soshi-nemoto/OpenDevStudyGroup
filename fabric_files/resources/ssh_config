@@ -1,0 +1,13 @@
+ServerAliveInterval 30
+
+Host *
+    StrictHostKeyChecking no
+
+Host github.com
+  User git
+  Port 22
+  Hostname github.com
+  IdentityFile {PRIVATE_KEY_FILE_FOR_GITHUB}
+  TCPKeepAlive yes
+  IdentitiesOnly yes
+
