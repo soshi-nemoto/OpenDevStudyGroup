@@ -1,0 +1,5 @@
+# setup docker server (base apps)
+- include: playbooks/server.yml
+# setup docker server
+- include: playbooks/docker.yml
+

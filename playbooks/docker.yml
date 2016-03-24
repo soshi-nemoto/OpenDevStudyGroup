@@ -1,0 +1,85 @@
+- hosts: Docker-server
+
+  vars:
+    docker_setup_url: "https://get.docker.com"
+    docker_list_file_path: "/etc/apt/sources.list.d"
+    docker_list_file_name: "docker.list"
+    resources_path: "./resources"
+    
+  tasks:
+    - name: "check Docker list file"
+      stat: path={{docker_list_file_path}}/{{docker_list_file_name}}
+      register: dockerlist
+      
+    - name: "Put docker list file"
+      become: yes
+      copy: src={{resources_path}}/{{docker_list_file_name}}
+            dest={{docker_list_file_path}}/{{docker_list_file_name}}
+            owner=vagrant
+            group=vagrant
+            mode=0644
+      when: not dockerlist.stat.exists
+
+    - name: "check Docker bin"
+      stat: path=/usr/bin/docker
+      register: dockerbin
+
+    - name: "APT: update"
+      become: yes
+      apt: update_cache=yes
+      when: not dockerbin.stat.exists
+
+    - name: "install apt auth related packagesr"
+      become: yes
+      apt: pkg={{ item }} state=present update_cache=yes
+      with_items:
+        - apparmor
+        - apt-transport-https
+        - ca-certificates
+      when: not dockerbin.stat.exists
+
+    - name: "get APT key"
+      become: yes
+      shell: >
+        apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+      when: not dockerbin.stat.exists
+
+    - name: "APT: update"
+      become: yes
+      apt: update_cache=yes
+      when: not dockerbin.stat.exists
+
+    - name: "APT: purge lxc-docker"
+      become: yes
+      apt: pkg=lxc-docker purge=yes
+      when: not dockerbin.stat.exists
+      ignore_errors: True
+      
+    - name: "APT : caceh"
+      become: yes
+      shell: >
+        apt-cache policy docker-engine
+      when: not dockerbin.stat.exists
+
+    - name: "APT: update"
+      become: yes
+      apt: update_cache=yes
+      when: not dockerbin.stat.exists
+
+    - name: "APT: add extra imager"
+      become: yes
+      apt: pkg=linux-image-extra-3.13.0-24-generic state=present update_cache=yes
+      when: not dockerbin.stat.exists
+
+    - name: "APT: install Docker"
+      become: yes
+      apt: pkg=docker-engine state=present update_cache=yes
+      when: not dockerbin.stat.exists
+
+    - name: "service docker start"
+      become: yes
+      service: name=docker state=started
+
+    - name: "set 'vagrant' group to vagrant user"
+      become: yes
+      user: name=vagrant groups=docker

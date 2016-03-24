@@ -1,0 +1,20 @@
+- hosts: Docker-server
+  
+  tasks:
+    - name: "APT: update"
+      become: yes
+      apt: update_cache=yes
+
+    - name: "APT: clean"
+      become: yes
+      shell: >
+        apt-get -y autoclean;
+        apt-get -y clean
+
+    - name: "APT: install required apps"
+      become: yes
+      apt: pkg={{ item }} state=present update_cache=yes
+      with_items:
+        - git
+        - unzip
+        - emacs
